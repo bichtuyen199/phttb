@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phiếu học tập Hóa 12 - Tinh bột và Cellulose</title>
+<style>
+:root{
+  --primary:#5367d9; --secondary:#7b5bd6; --bg:#f4f5ff; --card:#fff;
+  --text:#20243a; --muted:#69708a; --ok:#16a56a; --okbg:#eafaf3;
+  --bad:#e34d59; --badbg:#fff0f1; --border:#e1e4f2;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#f5f6ff,#eef0ff);font-family:Arial,Helvetica,sans-serif;color:var(--text);line-height:1.55}
+.container{max-width:1050px;margin:auto;padding:20px}
+.hero{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border-radius:24px;padding:28px;box-shadow:0 12px 30px #4f56a52b}
+.hero h1{margin:0 0 6px;font-size:clamp(25px,5vw,38px)}
+.hero p{margin:5px 0;opacity:.94}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;margin:18px 0;box-shadow:0 8px 24px #4b4e8610}
+.section-title{display:flex;gap:10px;align-items:center;color:#4655bd;margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+label{font-weight:700;font-size:14px;color:#555d78}
+input[type=text]{width:100%;padding:12px 14px;margin-top:6px;border:1px solid var(--border);border-radius:12px;font-size:16px;outline:none}
+input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px #5367d91a}
+.objective{background:#f6f7ff;border-left:4px solid var(--primary);padding:9px 12px;border-radius:10px;margin:8px 0}
+.question{padding:17px;border:1px solid var(--border);border-radius:16px;margin:14px 0;background:#fcfcff}
+.q-title{font-weight:700;margin-bottom:12px}
+.option{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid var(--border);border-radius:12px;margin:8px 0;cursor:pointer;transition:.2s}
+.option:hover{background:#f4f5ff}
+.option.selected{border-color:var(--primary);background:#eef0ff}
+.option.correct{border-color:var(--ok);background:var(--okbg)}
+.option.wrong{border-color:var(--bad);background:var(--badbg)}
+.feedback{font-weight:700;margin-top:9px}
+.ok{color:var(--ok)} .bad{color:var(--bad)}
+.check-btn,.main-btn{border:0;border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer}
+.check-btn{background:#eceeff;color:#4655bd;margin-top:8px}
+.controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:25px 0}
+.main-btn{font-size:16px;padding:13px 22px;color:white;background:linear-gradient(135deg,var(--primary),var(--secondary))}
+.main-btn.secondary{background:#5d6478}
+.main-btn:disabled{opacity:0.6;cursor:not-allowed}
+.result{display:none;text-align:center;background:linear-gradient(135deg,#eef0ff,#faf9ff);border:2px solid #cfd3ff}
+.score{font-size:38px;font-weight:800;color:#4c5bd0}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.match-row{display:contents}
+.match-left,.match-right{padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.match-right select{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px}
+.fill-input{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;font-size:16px}
+.memory{background:linear-gradient(135deg,#f4f1ff,#eef4ff)}
+.memory li{margin:8px 0}
+.drag-area{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.drag-items,.drop-zone{min-height:180px;border-radius:16px;padding:15px;background:#f7f7ff;border:2px dashed #c9cdf0}
+.drag-item{display:inline-flex;align-items:center;padding:11px 13px;margin:7px;border-radius:12px;background:#fff;border:1px solid #cdd1ea;box-shadow:0 4px 10px #4b4e8612;cursor:grab;font-weight:700;touch-action:none;user-select:none}
+.drag-item.selected{outline:3px solid #9da7ff;background:#eef0ff}
+.drop-zone{display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px}
+.drop-zone.target-hover{border-color:var(--primary);background:#f0f2ff}
+.drop-zone.correct{border-color:var(--ok);background:var(--okbg)}
+.drop-zone.wrong{animation:shake .3s}
+.toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);padding:13px 20px;border-radius:14px;color:#fff;background:var(--ok);font-weight:800;z-index:1000;box-shadow:0 10px 25px #0002}
+#syncStatus{margin-top:12px;font-weight:bold;font-size:15px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.small{color:var(--muted);font-size:14px}
+@media(max-width:700px){
+ .container{padding:12px}.card{padding:16px;border-radius:16px}.grid,.drag-area{grid-template-columns:1fr}
+ .match-grid{grid-template-columns:1fr}.hero{padding:22px;border-radius:18px}
+ .option{padding:12px}.controls .main-btn{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header class="hero">
+  <h1>🧪 PHIẾU HỌC TẬP TƯƠNG TÁC</h1>
+  <p><b>HÓA HỌC 12 – TINH BỘT VÀ CELLULOSE</b></p>
+  <p>Khám phá cấu tạo – tính chất – ứng dụng của hai polysaccharide quan trọng.</p>
+</header>
+
+<section class="card">
+<h2 class="section-title">👤 Thông tin học sinh</h2>
+<div class="grid">
+<div><label>Họ và tên <span style="color:red">*</span></label><input id="studentName" type="text" placeholder="Nhập họ và tên"></div>
+<div><label>Lớp <span style="color:red">*</span></label><input id="studentClass" type="text" placeholder="Ví dụ: 12C16"></div>
+</div>
+</section>
+
+<section class="card">
+<h2 class="section-title">🎯 Mục tiêu bài học</h2>
+<div class="objective">Nêu được đặc điểm cấu tạo phân tử của tinh bột và cellulose.</div>
+<div class="objective">Trình bày được tính chất hóa học đặc trưng và phản ứng thủy phân.</div>
+<div class="objective">Phân biệt được tinh bột và cellulose dựa vào cấu tạo, tính chất và ứng dụng.</div>
+<div class="objective">Vận dụng kiến thức để giải thích một số hiện tượng và ứng dụng thực tế.</div>
+</section>
+
+<section class="card" id="mcSection">
+<h2 class="section-title">📝 I. Trắc nghiệm nhiều lựa chọn</h2>
+<div id="mc"></div>
+</section>
+
+<section class="card" id="tfSection">
+<h2 class="section-title">☑️ II. Đúng – Sai</h2>
+<div id="tf"></div>
+</section>
+
+<section class="card" id="fillSection">
+<h2 class="section-title">✍️ III. Điền khuyết</h2>
+<div id="fill"></div>
+</section>
+
+<section class="card" id="matchSection">
+<h2 class="section-title">🔗 IV. Nối cột</h2>
+<p class="small">Chọn nội dung ở cột B tương ứng với từng nội dung ở cột A.</p>
+<div id="match"></div>
+</section>
+
+<section class="card" id="dragSection">
+<h2 class="section-title">🎯 V. Kéo thả / Chạm chọn</h2>
+<p class="small">Trên điện thoại: <b>chạm vào khái niệm → chạm vào vị trí đích</b>. Trên máy tính có thể kéo thả.</p>
+<div class="drag-area">
+<div>
+<h3>Khái niệm</h3>
+<div id="dragItems" class="drag-items"></div>
+</div>
+<div>
+<h3>Vị trí đích</h3>
+<div id="dropZones"></div>
+</div>
+</div>
+</section>
+
+<section class="card memory">
+<h2 class="section-title">🧠 Ghi nhớ cuối bài</h2>
+<ul>
+<li><b>Tinh bột</b> là polysaccharide do nhiều đơn vị α-glucose tạo nên; gồm amylose và amylopectin.</li>
+<li><b>Cellulose</b> là polysaccharide mạch không phân nhánh do nhiều đơn vị β-glucose tạo nên.</li>
+<li>Cả tinh bột và cellulose đều có thể bị thủy phân hoàn toàn tạo glucose.</li>
+<li>Tinh bột cho màu xanh tím với iodine; cellulose không cho phản ứng màu đặc trưng này.</li>
+<li>Cellulose được dùng sản xuất giấy, tơ nhân tạo, vật liệu; tinh bột là nguồn lương thực quan trọng.</li>
+</ul>
+</section>
+
+<section class="card result" id="result">
+<h2>🏆 KẾT QUẢ</h2>
+<div class="score" id="score"></div>
+<div id="resultText"></div>
+<div id="syncStatus"></div>
+</section>
+
+<div class="controls">
+<button class="main-btn secondary" onclick="resetQuiz()">🔄 Làm lại</button>
+<button class="main-btn" id="submitBtn" onclick="submitQuiz()">📤 Nộp bài</button>
+</div>
+</div>
+
+<script>
+// URL Web App Google Apps Script
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxivFz5th16LFGMJrAw4MzFDPh044O8bHHzu8BHlwR5J8JY9S29TNSOjA0k6XN-7VBu/exec";
+
+/* =========================
+   DỮ LIỆU BÀI HỌC
+   ========================= */
+const lessonData = {
+  multipleChoice: [
+    {q:"Đơn vị cấu tạo nên tinh bột là", opts:["β-glucose","α-glucose","fructose","sucrose"], ans:1},
+    {q:"Tinh bột gồm hai thành phần chính là", opts:["amylose và amylopectin","glucose và fructose","cellulose và glycogen","saccharose và maltose"], ans:0},
+    {q:"Cellulose được cấu tạo từ các đơn vị", opts:["α-glucose","β-glucose","fructose","saccharose"], ans:1},
+    {q:"Phản ứng đặc trưng dùng để nhận biết tinh bột là phản ứng với", opts:["NaOH","AgNO3/NH3","iodine (I2)","Cu(OH)2"], ans:2},
+    {q:"Sản phẩm cuối cùng của quá trình thủy phân hoàn toàn tinh bột là", opts:["fructose","glucose","saccharose","ethanol"], ans:1},
+    {q:"Ứng dụng quan trọng của cellulose là sản xuất", opts:["giấy và tơ nhân tạo","xà phòng","phân đạm","thủy tinh"], ans:0}
+  ],
+  trueFalse: [
+    {q:"Xét các phát biểu về tinh bột và cellulose:", s:[
+      ["Tinh bột và cellulose đều là polysaccharide.",true],
+      ["Tinh bột cho màu xanh tím với iodine.",true],
+      ["Cellulose có cấu trúc mạch phân nhánh giống amylopectin.",false],
+      ["Thủy phân hoàn toàn cellulose thu được glucose.",true]
+    ]},
+    {q:"Xét các phát biểu sau:", s:[
+      ["Amylose có cấu trúc mạch không phân nhánh.",true],
+      ["Amylopectin có cấu trúc mạch phân nhánh.",true],
+      ["Cellulose tan tốt trong nước lạnh.",false],
+      ["Tinh bột là chất dinh dưỡng quan trọng trong khẩu phần ăn.",true]
+    ]}
+  ],
+  fillBlank: [
+    {q:"Tinh bột gồm hai thành phần là ______ và ______.", answers:["amylose|amylopectin","amylose, amylopectin"]},
+    {q:"Thủy phân hoàn toàn cellulose thu được ______.", answers:["glucose","glucozơ"]},
+    {q:"Tinh bột tạo màu ______ với dung dịch iodine.", answers:["xanh tím","xanh-tím"]}
+  ],
+  matching: [
+    {a:"Tinh bột", opts:["Polysaccharide của α-glucose","Polysaccharide của β-glucose","Sản xuất giấy","Cho màu xanh tím với iodine"], ans:0},
+    {a:"Cellulose", opts:["Polysaccharide của α-glucose","Polysaccharide của β-glucose","Sản xuất giấy","Cho màu xanh tím với iodine"], ans:1},
+    {a:"Ứng dụng tiêu biểu của cellulose", opts:["Polysaccharide của α-glucose","Polysaccharide của β-glucose","Sản xuất giấy","Cho màu xanh tím với iodine"], ans:2},
+    {a:"Dấu hiệu nhận biết tinh bột", opts:["Polysaccharide của α-glucose","Polysaccharide của β-glucose","Sản xuất giấy","Cho màu xanh tím với iodine"], ans:3}
+  ],
+  dragDrop: [
+    {label:"Tinh bột", target:"tinhbot"},
+    {label:"Cellulose", target:"cellulose"},
+    {label:"Amylose", target:"amylose"},
+    {label:"Amylopectin", target:"amylopectin"}
+  ]
+};
+
+/* =========================
+   RENDER
+   ========================= */
+function render(){
+  mc.innerHTML = lessonData.multipleChoice.map((x,i)=>`
+    <div class="question" data-q="${i}">
+      <div class="q-title">Câu ${i+1}. ${x.q}</div>
+      ${x.opts.map((o,j)=>`<label class="option"><input type="radio" name="mc${i}" value="${j}"> ${o}</label>`).join("")}
+      <div class="feedback" id="mcf${i}"></div>
+    </div>`).join("");
+
+  tf.innerHTML = lessonData.trueFalse.map((x,i)=>`
+    <div class="question">
+      <div class="q-title">Câu ${i+1}. ${x.q}</div>
+      ${x.s.map((s,j)=>`
+      <div class="tfrow">
+        <div><b>${j+1}.</b>${s[0]}</div>
+        <label class="option"><input type="radio" name="tf${i}_${j}" value="true"> Đúng</label>
+        <label class="option"><input type="radio" name="tf${i}_${j}" value="false"> Sai</label>
+      </div>`).join("")}
+    </div>`).join("");
+
+  fill.innerHTML = lessonData.fillBlank.map((x,i)=>`
+    <div class="question">
+      <div class="q-title">Câu ${i+1}. ${x.q}</div>
+      <input class="fill-input" id="fill${i}" placeholder="Nhập đáp án...">
+      <div class="feedback" id="fillf${i}"></div>
+    </div>`).join("");
+
+  match.innerHTML = `<div class="match-grid">`+lessonData.matching.map((x,i)=>`
+    <div class="match-left"><b>${i+1}.</b> ${x.a}</div>
+    <div class="match-right"><select id="match${i}">
+      <option value="">-- Chọn --</option>
+      ${x.opts.map((o,j)=>`<option value="${j}">${o}</option>`).join("")}
+    </select></div>`).join("")+`</div>`;
+
+  dragItems.innerHTML = lessonData.dragDrop.map((x,i)=>
+    `<div class="drag-item" draggable="true" data-target="${x.target}" id="drag${i}">${x.label}</div>`).join("");
+
+  const targets = [
+    ["tinhbot","Đặc điểm của Tinh bột"],
+    ["cellulose","Đặc điểm của Cellulose"],
+    ["amylose","Amylose"],
+    ["amylopectin","Amylopectin"]
+  ];
+  dropZones.innerHTML = targets.map(t=>`
+    <div class="question drop-zone" data-target="${t[0]}">
+      <b>${t[1]}</b>
+    </div>`).join("");
+  setupDragDrop();
+}
+render();
+
+/* =========================
+   KÉO THẢ + POINTER/TOUCH
+   ========================= */
+let selectedDrag=null;
+function setupDragDrop(){
+  document.querySelectorAll(".drag-item").forEach(el=>{
+    el.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",el.id));
+    el.addEventListener("click",()=>{
+      if(el.classList.contains("locked")) return;
+      document.querySelectorAll(".drag-item").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected"); selectedDrag=el;
+    });
+    el.addEventListener("pointerdown",()=>{
+      if(el.classList.contains("locked")) return;
+      selectedDrag=el;
+      document.querySelectorAll(".drag-item").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+    });
+  });
+  document.querySelectorAll(".drop-zone").forEach(zone=>{
+    zone.addEventListener("dragover",e=>{e.preventDefault();zone.classList.add("target-hover")});
+    zone.addEventListener("dragleave",()=>zone.classList.remove("target-hover"));
+    zone.addEventListener("drop",e=>{
+      e.preventDefault(); zone.classList.remove("target-hover");
+      const id=e.dataTransfer.getData("text/plain"); placeDrag(document.getElementById(id),zone);
+    });
+    zone.addEventListener("click",()=>{
+      if(selectedDrag) placeDrag(selectedDrag,zone);
+    });
+    zone.addEventListener("pointerup",()=>{
+      if(selectedDrag) placeDrag(selectedDrag,zone);
+    });
+  });
+}
+function placeDrag(item,zone){
+  if(!item || item.classList.contains("locked") || zone.classList.contains("correct")) return;
+  if(item.dataset.target===zone.dataset.target){
+    zone.appendChild(item);
+    item.classList.remove("selected"); item.classList.add("locked");
+    item.draggable=false;
+    zone.classList.add("correct");
+    showToast("Chính xác! 🎉");
+    selectedDrag=null;
+  }else{
+    zone.classList.add("wrong");
+    showToast("Chưa đúng, hãy thử lại nhé! 💡",false);
+    setTimeout(()=>zone.classList.remove("wrong"),350);
+  }
+}
+function showToast(msg,good=true){
+  const t=document.createElement("div");t.className="toast";t.textContent=msg;
+  if(!good)t.style.background="#e34d59";
+  document.body.appendChild(t);setTimeout(()=>t.remove(),1300);
+}
+
+/* =========================
+   CHẤM ĐIỂM & GỬI DỮ LIỆU
+   ========================= */
+function normalize(s){return String(s||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ")}
+
+function submitQuiz(){
+  const studentName = document.getElementById("studentName").value.trim();
+  const studentClass = document.getElementById("studentClass").value.trim();
+
+  if(!studentName || !studentClass){
+    alert("Vui lòng điền đầy đủ Họ và tên, Lớp trước khi nộp bài!");
+    document.getElementById("studentName").focus();
+    return;
+  }
+
+  let correct=0, total=0, answeredCount=0;
+
+  // I. Trắc nghiệm
+  lessonData.multipleChoice.forEach((x,i)=>{
+    total++;
+    const chosen=document.querySelector(`input[name="mc${i}"]:checked`);
+    const fb=document.getElementById(`mcf${i}`);
+    document.querySelectorAll(`input[name="mc${i}"]`).forEach(inp=>inp.parentElement.classList.remove("correct","wrong","selected"));
+    if(chosen){
+      answeredCount++;
+      chosen.parentElement.classList.add(+chosen.value===x.ans?"correct":"wrong");
+      if(+chosen.value===x.ans){correct++;fb.textContent="✅ Chính xác!";fb.className="feedback ok"}
+      else {fb.textContent="❌ Chưa đúng.";fb.className="feedback bad"}
+    }else{fb.textContent="⚠️ Chưa trả lời.";fb.className="feedback bad"}
+  });
+
+  // II. Đúng - Sai
+  lessonData.trueFalse.forEach((x,i)=>x.s.forEach((s,j)=>{
+    total++;
+    const chosen=document.querySelector(`input[name="tf${i}_${j}"]:checked`);
+    if(chosen){
+      answeredCount++;
+      if((chosen.value==="true")===s[1]) correct++;
+      chosen.parentElement.classList.add((chosen.value==="true")===s[1]?"correct":"wrong");
+    }
+  }));
+
+  // III. Điền khuyết
+  lessonData.fillBlank.forEach((x,i)=>{
+    total++;
+    const rawVal=document.getElementById(`fill${i}`).value.trim();
+    if(rawVal !== "") answeredCount++;
+    const val=normalize(rawVal);
+    const ok=x.answers.some(a=>normalize(a)===val);
+    const fb=document.getElementById(`fillf${i}`);
+    if(ok){correct++;fb.textContent="✅ Chính xác!";fb.className="feedback ok"}
+    else{fb.textContent="❌ Chưa đúng.";fb.className="feedback bad"}
+  });
+
+  // IV. Nối cột
+  lessonData.matching.forEach((x,i)=>{
+    total++;
+    const val=document.getElementById(`match${i}`).value;
+    if(val!==""){
+      answeredCount++;
+      if(+val===x.ans) correct++;
+    }
+  });
+
+  // V. Kéo thả
+  lessonData.dragDrop.forEach(x=>{
+    total++;
+    if(document.querySelector(`.drop-zone[data-target="${x.target}"] .drag-item`)){
+      answeredCount++;
+      correct++;
+    }
+  });
+
+  const wrongCount = answeredCount - correct;
+  const unperformedCount = total - answeredCount;
+  const score = (correct / total * 10).toFixed(1);
+
+  // Hiển thị kết quả
+  document.getElementById("result").style.display="block";
+  document.getElementById("score").textContent=`${score}/10`;
+  let msg=score>=9?"Xuất sắc 🎉":score>=8?"Rất tốt 👍":score>=6.5?"Khá 💪":score>=5?"Đạt – tiếp tục cố gắng!":"Cần ôn tập thêm 📚";
+  document.getElementById("resultText").innerHTML=`Bạn đúng <b>${correct}/${total}</b> câu/ý. ${msg}`;
+  document.getElementById("result").scrollIntoView({behavior:"smooth",block:"center"});
+
+  // Gửi dữ liệu tới Google Sheets
+  sendDataToGoogleSheet({
+    hoTen: studentName,
+    lop: studentClass,
+    diem: score,
+    soCauDung: correct,
+    soCauSai: wrongCount,
+    soCauChuaLam: unperformedCount,
+    tongSoCau: total,
+    thoiGian: new Date().toLocaleString("vi-VN")
+  });
+}
+
+function sendDataToGoogleSheet(payload){
+  const syncStatus = document.getElementById("syncStatus");
+  const submitBtn = document.getElementById("submitBtn");
+  
+  syncStatus.style.color = "#5367d9";
+  syncStatus.textContent = "⏳ Đang gửi kết quả lên hệ thống...";
+  submitBtn.disabled = true;
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    syncStatus.style.color = "#16a56a";
+    syncStatus.textContent = "✅ Đã lưu kết quả thành công vào Google Sheets!";
+  })
+  .catch(err => {
+    console.error("Lỗi gửi dữ liệu:", err);
+    syncStatus.style.color = "#e34d59";
+    syncStatus.textContent = "❌ Gửi kết quả thất bại. Vui lòng kiểm tra kết nối!";
+    submitBtn.disabled = false;
+  });
+}
+
+function resetQuiz(){location.reload();}
+</script>
+</body>
+</html>
